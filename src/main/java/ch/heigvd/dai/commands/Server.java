@@ -25,7 +25,7 @@ public class Server implements Callable<Integer> {
     public int getBoardSize() {
         return BoardSize;
     }
-    
+
      */
 
     @Override
