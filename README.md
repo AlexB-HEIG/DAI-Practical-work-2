@@ -66,7 +66,7 @@ To build the application, you can use the following commands in your terminal.
 ./mvnw package
 ```
 Or you can use _Package application as JAR file_ configuration file to build easily in Intellij IDEA.  
-![maven_config](doc/package.png)
+![maven_config](doc/img/package.png)
 
 ## Getting Started Using Docker
 ### Prerequisites
