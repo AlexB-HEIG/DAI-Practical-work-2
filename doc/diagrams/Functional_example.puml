@@ -1,0 +1,82 @@
+@startuml
+
+title "Functionnal example"
+
+participant "Client 1" as c1
+participant "Server" as s
+participant "Client 2" as c2
+
+== Join the server ==
+
+note over c1, c2
+The socket is instanciated and the connection is
+automatically established.
+end note
+
+c1->s : Establish connection
+c1<-->s : Connection established
+
+c1->s: JOIN Player1
+s->c1: OK
+
+c2->s : Establish connection
+c2<-->s : Connection established
+
+c2->s: JOIN Player2
+s->c2: OK
+
+== List connected clients ==
+
+c1->s: LIST
+s->c1: CLIENTS Player1 Player2
+
+== Game start ==
+
+loop
+
+c1->s : Create board
+s->c1: OK
+
+    c1->s: Player 1 make a move
+    s->c1: Update the board of Player 1
+    s->c2: Inform Player 2 of Player 1's move
+    s->c2: Update the board of Player 2
+
+    c2->s: Player 2 make a move
+    s->c2: Update the board of Player 2
+    s->c1: Inform Player 2 of Player 2's move
+    s->c1: Update the board of Player 1
+
+    alt Game End (Win)
+        s -> c1: Notify Player 1 (Win)
+        s -> c2: Notify Player 2 (Loss)
+    end
+
+    alt Game End (Draw)
+        s -> c1: Notify Player 1 (Draw)
+        s -> c2: Notify Player 2 (Draw)
+    end
+
+end
+
+== Quit ==
+
+note over c1, c2
+Just as for the connection establishment, no
+formal message is sent to the server when
+disconnecting.
+
+The socket is closed by the client and the
+connection is automatically closed.
+end note
+
+c1->c1: Close the connection
+c1<-->s: The connection is closed
+s->s: Remove Player1 from users
+
+c2->c2: Close the connection
+c2<-->s: The connection is closed
+s->s: Remove Player2 from users
+
+
+@enduml

@@ -51,3 +51,12 @@ After a game has finished, the Player 1 can choose to begin another game, where 
 
 
 ## Section 4 - Examples
+
+### Functional Example
+![Functional Example](img/Functional_example-Functionnal_example.png)
+### Wrong Format grid selection error
+![Wrong Format grid selection error](img/format_error_example-Wrong_grid_selection_format_example.png)
+### Case already filed error
+![Case already filed error](img/case_filed_error_example-Grid_case_already_filed_example.png)
+### Out of bound grid selection error
+![Out of bound grid selection error](img/out_of_bound_error_example-Out_of_Bound_grid_selection_example.png)
