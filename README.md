@@ -66,7 +66,7 @@ To build the application, you can use the following commands in your terminal.
 ./mvnw package
 ```
 Or you can use _Package application as JAR file_ configuration file to build easily in Intellij IDEA.  
-![maven config](doc/package.png)
+![maven_config](doc/package.png)
 
 ## Getting Started Using Docker
 ### Prerequisites
@@ -78,12 +78,33 @@ If that's not the case, please go to the offical website ([Dockerdocs](https://d
 ### Setup
 #### Get package
 
+Go get our package on [placeholder](https://github.com/LisaGorgerat?tab=packages)
 
 #### Build the application
-
+ 
+To build the image, go in the folder of the app and use the command:
+```sh
+docker build -t <nom_app>
+```
 
 ## Usage
-
+Once the app is built, you can run it.
 ### Run the application
+If you are using docker, you can use the command:
+````sh
+docker run <image-name>
+````
+
+Otherwise, you can use the terminal with:
+````sh
+java -jar target/DAI-Practical-work-2-1.0-SNAPSHOT.jar client <host> <port>
+java -jar target/DAI-Practical-work-2-1.0-SNAPSHOT.jar server <port> 
+````
+or with the premades configs:
+
+![start server]()
+
+![start client]()
+
 
 ## Demonstration
