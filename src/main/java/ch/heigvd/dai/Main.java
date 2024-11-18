@@ -12,8 +12,9 @@ public class Main {
     public static void main(String[] args) {
 
 
-        GameClient client = new GameClient("localhost", 8080);
+        GameClient client = new GameClient("localhost", 6433);
 
+        client.launchClient();
 
         System.out.println("Hello world!");
 
