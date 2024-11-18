@@ -1,0 +1,48 @@
+@startuml
+actor "Client (Player 1)" as Player1
+actor "Client (Player 2)" as Player2
+entity "Server" as Server
+entity "Game Thread" as GameThread
+
+Player1 -> Server: Start Game
+Server -> GameThread: Create Game
+Server -> GameThread: Assign Player 1
+
+Player1 -> Server: Join Game
+Server -> GameThread: Assign Player 2
+
+loop from 9 to 81 move
+    Player1 -> Server: Send Move 1
+    Server -> GameThread: Update Game Board
+    Server -> Player2: Notify Player 2 of Move 1
+
+    Player2 -> Server: Send Move 2
+    Server -> GameThread: Update Game Board
+    Server -> Player1: Notify Player 1 of Move 2
+
+    Player1 -> Server: Send Move 3
+    Server -> GameThread: Update Game Board
+    Server -> Player2: Notify Player 2 of Move 3
+
+    Player2 -> Server: Send Move N
+    Server -> GameThread: Update Game Board
+    Server -> Player2: Notify Player 1 of Move N
+
+    Server -> GameThread: Check for Win
+    GameThread -> Server: Check for Win
+
+    alt Game End (Win)
+        Server -> Player1: Notify Player 1 (Win)
+        Server -> Player2: Notify Player 2 (Loss)
+    end
+
+    alt Game End (Draw)
+        Server -> Player1: Notify Player 1 (Draw)
+        Server -> Player2: Notify Player 2 (Draw)
+    end
+
+end
+
+Server -> GameThread: End Game
+GameThread -> Server: Close Game Thread
+@enduml
