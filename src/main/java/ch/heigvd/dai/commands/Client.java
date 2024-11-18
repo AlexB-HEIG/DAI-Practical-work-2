@@ -24,11 +24,8 @@ public class Client implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        try (Socket socket = new Socket(host, port);) {
-            System.out.println("Client connected to " + host + ":" + port);
-        } catch (IOException e) {
-            System.out.println("Client exception: " + e);
-        }
+        GameClient client = new GameClient(host, port);
+        client.launchClient();
         return 0;
     }
 }

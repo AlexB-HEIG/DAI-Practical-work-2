@@ -34,19 +34,8 @@ public class Server implements Callable<Integer> {
 
     @Override
     public Integer call() throws IOException {
-
-        try (ServerSocket serverSocket = new ServerSocket(port);
-            ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();) {
-            System.out.println("Server started on port " + port);
-
-            while (!serverSocket.isClosed()) {
-                Socket clientSocket = serverSocket.accept();
-                executor.submit(new ClientHandler(clientSocket));
-            }
-        } catch (IOException e) {
-            System.out.println("Server exception: " + e);
-            return -1;
-        }
+        GameServer server = new GameServer(port);
+        server.launchServer();
         return 0; // Success
     }
 }
