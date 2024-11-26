@@ -12,7 +12,7 @@ public class Main {
     public static void main(String[] args) {
 
 
-        GameClient client = new GameClient("localhost", 6433);
+/*        GameClient client = new GameClient("localhost", 6433);
 
         client.launchClient();
 
@@ -32,10 +32,10 @@ public class Main {
                 });
 
             }
-        }
+        }*/
 
 
-        /*
+
 
         // Define command name - source: https://stackoverflow.com/a/11159435
         String jarFilename =
@@ -54,6 +54,6 @@ public class Main {
 
         System.exit(exitCode);
 
-         */
+
     }
 }

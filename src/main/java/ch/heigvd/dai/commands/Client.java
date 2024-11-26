@@ -3,6 +3,8 @@ package ch.heigvd.dai.commands;
 import java.util.concurrent.Callable;
 import java.io. *;
 import java.net.*;
+
+import ch.heigvd.dai.game.GameClient;
 import picocli.CommandLine;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

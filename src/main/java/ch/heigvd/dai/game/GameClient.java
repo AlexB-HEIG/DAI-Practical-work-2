@@ -10,12 +10,23 @@ public class GameClient {
     private final int PORT;
     private static final int CLIENT_ID = (int) (Math.random() * 1000000);
 
+    private static final String ANSI_RESET = "\u001B[0m";
+    private static final String ANSI_RED = "\u001B[31m";
+
     private enum ClientCommand {
         LIST,
         JOIN,
         CREATE,
         QUIT,
-        HELP
+        HELP,
+        QUITGAME,
+        PLACE
+    }
+
+    private enum ServerCommand {
+        INIT_GAME,
+        GAME_LIST,
+        INVALID
     }
 
     public GameClient(String host, int port) {
@@ -38,7 +49,7 @@ public class GameClient {
             help();
 
             while (!socket.isClosed()) {
-                System.out.print("> ");
+                System.out.print("\n> ");
 
                 BufferedReader cbir = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
                 String userInput = cbir.readLine();
@@ -58,7 +69,8 @@ public class GameClient {
                             request = ClientCommand.JOIN.name();
                         }
                         case CREATE -> {
-                            request = ClientCommand.CREATE.name();
+                            //TODO: fix if one argument launch exept
+                            request = ClientCommand.CREATE + " " + userInputParts[1];
                         }
                         case QUIT -> {
                             socket.close();
@@ -66,6 +78,7 @@ public class GameClient {
                         }
                         case HELP -> {
                             help();
+                            continue;
                         }
                     }
 
@@ -80,15 +93,42 @@ public class GameClient {
                     continue;
                 }
 
+
                 String serverResponse = socketIn.readLine();
+
                 if (serverResponse == null) {
+                    System.out.println(ANSI_RED
+                            + "[Client " + CLIENT_ID + "] Server unexpectedly closed."
+                            + ANSI_RESET);
                     socket.close();
                     continue;
                 }
 
-                
-                System.out.println(serverResponse);
 
+                try {
+                    String[] serverResponseParts = serverResponse.split(" ", 2);
+                    ServerCommand serverCommand = ServerCommand.valueOf(serverResponseParts[0]);
+
+                    switch (serverCommand) {
+                        case INIT_GAME -> {
+                            //TODO: maybe call fonction with while
+                        }
+                        case GAME_LIST -> {
+                            String[] gamelist = serverResponseParts[1].split("/");
+                            for (String s : gamelist) {
+                                System.out.println(s);//TODO: finish
+                            }
+                        }
+
+                        case INVALID -> {
+                            System.out.println(serverResponseParts[1]);
+                        }
+                    }
+
+
+                } catch (IllegalArgumentException e) {
+                    //TODO: think
+                }
 
 
             }
@@ -98,16 +138,19 @@ public class GameClient {
         } catch (Exception e) {
             System.out.println("[Client " + CLIENT_ID + "] exception: " + e);
         }
+    }
+
+
+    private static void inGame(){
 
 
     }
-
 
     private static void help() {
         System.out.println("Usage:");
         System.out.println(" " + ClientCommand.LIST + " - Not currently implemented.");  //TODO: if time
         System.out.println(" " + ClientCommand.JOIN + " - Not currently implemented.");  //TODO: if time
-        System.out.println(" " + ClientCommand.CREATE + " - Not currently implemented.");//TODO: if time
+        System.out.println(" " + ClientCommand.CREATE + " <grid size> - Create a new game with the given grid size.");
         System.out.println(" " + ClientCommand.QUIT + " - Close the connection to the server.");
         System.out.println(" " + ClientCommand.HELP + " - Display this help message.");
     }
