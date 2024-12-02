@@ -13,6 +13,8 @@ public class GameClient {
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_RED = "\u001B[31m";
 
+    private boolean inGame = false;
+
     private enum ClientCommand {
         LIST,
         JOIN,
@@ -55,31 +57,55 @@ public class GameClient {
                 String userInput = cbir.readLine();
 
                 try {
-
-                    String[] userInputParts = userInput.split(" ", 2);
-                    ClientCommand command = ClientCommand.valueOf(userInputParts[0].toUpperCase());
-
                     String request = null;
 
-                    switch (command) {
-                        case LIST -> {
-                            request = ClientCommand.LIST.name();
+                    if (!inGame) {
+                        String[] userInputParts = userInput.split(" ", 2);
+                        ClientCommand command = ClientCommand.valueOf(userInputParts[0].toUpperCase());
+
+
+
+                        switch (command) {
+                            case LIST -> {
+                                request = ClientCommand.LIST.name();
+                            }
+                            case JOIN -> {
+                                request = ClientCommand.JOIN.name();
+
+                            }
+                            case CREATE -> {
+                                //TODO: fix if one argument launch exept
+                                request = ClientCommand.CREATE + " " + userInputParts[1];
+
+                            }
+                            case QUIT -> {
+                                socket.close();
+                                continue;
+                            }
+                            case HELP -> {
+                                help();
+                                continue;
+                            }
                         }
-                        case JOIN -> {
-                            request = ClientCommand.JOIN.name();
+
+                    } else {
+                        String[] userInputParts = userInput.split(" ", 2);
+                        ClientCommand command = ClientCommand.valueOf(userInputParts[0].toUpperCase());
+
+
+
+                        switch (command) {
+                            case PLACE -> {
+                            }
+                            case QUITGAME -> {
+                                inGame = false;
+                            }
+                            case HELP -> {
+                                helpInGame();
+                                continue;
+                            }
                         }
-                        case CREATE -> {
-                            //TODO: fix if one argument launch exept
-                            request = ClientCommand.CREATE + " " + userInputParts[1];
-                        }
-                        case QUIT -> {
-                            socket.close();
-                            continue;
-                        }
-                        case HELP -> {
-                            help();
-                            continue;
-                        }
+
                     }
 
                     if (request != null) {
@@ -111,10 +137,11 @@ public class GameClient {
 
                     switch (serverCommand) {
                         case INIT_GAME -> {
+                            inGame = true;
                             //TODO: maybe call fonction with while
                         }
                         case GAME_LIST -> {
-                            String[] gamelist = serverResponseParts[1].split("/");
+                            String[] gamelist = serverResponseParts[1].split("¦");
                             for (String s : gamelist) {
                                 System.out.println(s);//TODO: finish
                             }
@@ -141,17 +168,19 @@ public class GameClient {
     }
 
 
-    private static void inGame(){
-
-
-    }
-
     private static void help() {
         System.out.println("Usage:");
-        System.out.println(" " + ClientCommand.LIST + " - Not currently implemented.");  //TODO: if time
+        System.out.println(" " + ClientCommand.LIST + " - Display the list of available games.");  //TODO: if time
         System.out.println(" " + ClientCommand.JOIN + " - Not currently implemented.");  //TODO: if time
         System.out.println(" " + ClientCommand.CREATE + " <grid size> - Create a new game with the given grid size.");
         System.out.println(" " + ClientCommand.QUIT + " - Close the connection to the server.");
+        System.out.println(" " + ClientCommand.HELP + " - Display this help message.");
+    }
+
+    private static void helpInGame() {
+        System.out.println("Usage:");
+        System.out.println(" " + ClientCommand.PLACE + " <row> <column> - Place a marker at the specified position.");
+        System.out.println(" " + ClientCommand.QUITGAME + " - Quit the current game.");
         System.out.println(" " + ClientCommand.HELP + " - Display this help message.");
     }
 }

@@ -17,6 +17,16 @@ public class GameServer {
     private static ConcurrentHashMap<Integer, Socket> clientMap = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<Integer, GameHandler> gamesMap = new ConcurrentHashMap<>();
 
+    private static final String ANSI_RESET = "\u001B[0m";
+    private static final String ANSI_BLACK = "\u001B[30m";
+    private static final String ANSI_RED = "\u001B[31m";
+    private static final String ANSI_GREEN = "\u001B[32m";
+    private static final String ANSI_YELLOW = "\u001B[33m";
+    private static final String ANSI_BLUE = "\u001B[34m";
+    private static final String ANSI_PURPLE = "\u001B[35m";
+    private static final String ANSI_CYAN = "\u001B[36m";
+    private static final String ANSI_WHITE = "\u001B[37m";
+
     private enum ClientCommand {
         LIST,
         JOIN,
@@ -79,9 +89,9 @@ public class GameServer {
                  BufferedWriter socketOut = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8))) {
 
 
-                System.out.println("[Server " + SERVER_ID + "] new client connected from "
+                System.out.println(ANSI_BLUE + "[Server " + SERVER_ID + "] new client connected from "
                         + socket.getInetAddress().getHostAddress() + ":" + socket.getPort()
-                        + "\n    using Client ID " + CLIENT_ID);
+                        + "\n    using Client ID " + CLIENT_ID + ANSI_RESET);
 
                 while (!socket.isClosed()) {
 
@@ -104,7 +114,14 @@ public class GameServer {
 
                             switch (clientCommand) {
                                 case LIST -> {
-                                    //TODO: game list logic
+                                    System.out.println("[Server " + SERVER_ID + "] \n"
+                                            + "     [Client " + CLIENT_ID + "] request game list");
+
+                                    response = ServerCommand.GAME_LIST + " Game id    Grid Size ¦";
+
+                                    for (Integer key : gamesMap.keySet()) {
+                                        response += String.format("%7d    %d ¦", key, gamesMap.get(key).getGridSize());
+                                    }
                                 }
 
 
@@ -117,6 +134,15 @@ public class GameServer {
                                     // int gameId = Integer.parseInt(clientRequestParts[1]);
                                     // lauch playgame
 
+                                    int gameId = Integer.parseInt(clientRequestParts[1]);
+                                    GAME_ID = gameId;
+                                    inGame = true;
+
+                                    System.out.println(ANSI_GREEN + "[Server " + SERVER_ID + "] \n"
+                                            + "     [Client " + CLIENT_ID + "] join [Game " + gameId +"]"+ ANSI_RESET);
+
+
+                                    response = ServerCommand.INIT_GAME.name();
                                 }
 
 
@@ -147,12 +173,13 @@ public class GameServer {
 
                                     gamesMap.put(gameId, new GameHandler(gameId, gridSize));
 
-                                    System.out.println("[Server " + SERVER_ID + "] \n"
-                                            + "     [Client " + CLIENT_ID + "] new game created with id " + gameId);
+                                    System.out.println(ANSI_GREEN + "[Server " + SERVER_ID + "] \n"
+                                            + "     [Client " + CLIENT_ID + "] created [Game " + gameId +"]"+ ANSI_RESET);
 
                                     GAME_ID = gameId;
                                     inGame = true;
 
+                                    response = ServerCommand.INIT_GAME.name();
                                 }
                             }
 
@@ -163,12 +190,13 @@ public class GameServer {
 
                             switch (clientCommand) {
                                 case QUITGAME -> {
-                                // commande to quit game
+                                    // commande to quit game
+                                    inGame = false;
                                 }
 
 
                                 case PLACE -> {
-                                // PLACE A 1
+                                    // PLACE A 1
 
                                 }
                             }
@@ -224,6 +252,10 @@ public class GameServer {
 
         String getTable() {//TODO: do logic
             return null;
+        }
+
+        int getGridSize() {
+            return gridSize;
         }
     }
 }
