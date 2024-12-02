@@ -25,10 +25,10 @@ c2<-->s : Connection established
 c2->s: JOIN Player2
 s->c2: OK
 
-== List connected clients ==
+== List games available ==
 
 c1->s: LIST
-s->c1: CLIENTS Player1 Player2
+s->c1: GAME_LIST <list of games>
 
 == Game start ==
 

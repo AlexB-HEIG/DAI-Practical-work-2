@@ -1,6 +1,6 @@
 @startuml
 
-title "Grid case already filed example"
+title "The size for the board is out bounds example"
 
 participant "Client 1" as c1
 participant "Server" as s
@@ -30,14 +30,9 @@ s->c2: OK
 c1->s: LIST
 s->c1: GAME_LIST <list of games>
 
-== Game start ==
+== The size for the board is out bounds ==
 
 c1->s : Create board
-s->c1: OK
-
-== Grid case already filed ==
-c1->s: Player 1 make a move
-s->c1: ERROR 2
-
+s->c1: ERROR 1
 
 @enduml

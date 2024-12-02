@@ -84,15 +84,33 @@ Go get our package on [placeholder](https://github.com/LisaGorgerat?tab=packages
  
 To build the image, go in the folder of the app and use the command:
 ```sh
-docker build -t <nom_app>
+docker build -t <app_name>
 ```
 
 ## Usage
 Once the app is built, you can run it.
 ### Run the application
-If you are using docker, you can use the command:
+
+In the case of docker, we also need to create a network, so that 2 container can communicate with eachother:
 ````sh
-docker run <image-name>
+docker network create <network_name>
+````
+
+And you can list the Docker networks with:
+````sh
+docker network ls
+````
+
+Then you need to run each container:
+
+- the first one:
+````sh
+docker run --rm -it --network <network_name> --name <container_name> <img_name> -l <port>
+````
+
+- the second one:
+````sh
+docker run --rm -it --network <network_name> --name <img_name> <container_name> <port>
 ````
 
 Otherwise, you can use the terminal with:
@@ -106,5 +124,6 @@ or with the premades configs:
 
 ![start client]()
 
-
 ## Demonstration
+
+

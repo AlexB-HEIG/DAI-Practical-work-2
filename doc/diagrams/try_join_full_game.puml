@@ -1,10 +1,11 @@
 @startuml
 
-title "Grid case already filed example"
+title "A Player try to join a game that is already full"
 
 participant "Client 1" as c1
 participant "Server" as s
 participant "Client 2" as c2
+participant "Client 3" as c3
 
 == Join the server ==
 
@@ -25,19 +26,9 @@ c2<-->s : Connection established
 c2->s: JOIN Player2
 s->c2: OK
 
-== List games available ==
+== A Player try to join a game that is already full ==
 
-c1->s: LIST
-s->c1: GAME_LIST <list of games>
-
-== Game start ==
-
-c1->s : Create board
-s->c1: OK
-
-== Grid case already filed ==
-c1->s: Player 1 make a move
-s->c1: ERROR 2
-
+c3->s: JOIN Player3
+s->c3: ERROR 1
 
 @enduml
