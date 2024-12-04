@@ -2,6 +2,8 @@ package ch.heigvd.dai.commands;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
+
+import ch.heigvd.dai.game.GameServer;
 import picocli.CommandLine;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.*;
