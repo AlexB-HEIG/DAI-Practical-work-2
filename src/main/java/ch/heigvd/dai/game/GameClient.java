@@ -71,11 +71,16 @@ public class GameClient {
                             }
                             case JOIN -> {
                                 request = ClientCommand.JOIN.name();
-
+                                if (userInputParts.length > 1) {
+                                    request += " " + userInputParts[1];
+                                }
                             }
                             case CREATE -> {
-                                //TODO: fix if one argument launch exept
-                                request = ClientCommand.CREATE + " " + userInputParts[1];
+                                request = ClientCommand.CREATE.name();
+                                if (userInputParts.length > 1) {
+                                    request += " " + userInputParts[1];
+                                }
+
                                 //TODO: wait for srv and put quit msg ctrl C
 
                             }
@@ -120,6 +125,7 @@ public class GameClient {
                 }
 
 
+                // Wait here after game creation
                 String serverResponse = socketIn.readLine();
 
                 if (serverResponse == null) {
@@ -178,8 +184,8 @@ public class GameClient {
 
     private static void help() {
         System.out.println("Usage:");
-        System.out.println(" " + ClientCommand.LIST + " - Display the list of available games.");  //TODO: if time
-        System.out.println(" " + ClientCommand.JOIN + " - Not currently implemented.");  //TODO: if time
+        System.out.println(" " + ClientCommand.LIST + " - Display the list of available games.");
+        System.out.println(" " + ClientCommand.JOIN + " <game id> - Join the game with the given id.");
         System.out.println(" " + ClientCommand.CREATE + " <grid size> - Create a new game with the given grid size.");
         System.out.println(" " + ClientCommand.QUIT + " - Close the connection to the server.");
         System.out.println(" " + ClientCommand.HELP + " - Display this help message.");

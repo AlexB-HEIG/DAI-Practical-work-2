@@ -136,14 +136,18 @@ public class GameServer {
                                     // lauch playgame
 
                                     int gameId = Integer.parseInt(clientRequestParts[1]);
-                                    GAME_ID = gameId;
-                                    inGame = true;
+                                    if (gamesMap.containsKey(gameId)) {
+                                        GAME_ID = gameId;
+                                        inGame = true;
 
-                                    System.out.println(ANSI_GREEN + "[Server " + SERVER_ID + "] \n"
-                                            + "     [Client " + CLIENT_ID + "] join [Game " + gameId +"]"+ ANSI_RESET);
+                                        System.out.println(ANSI_GREEN + "[Server " + SERVER_ID + "] \n"
+                                                + "     [Client " + CLIENT_ID + "] join [Game " + gameId + "]" + ANSI_RESET);
 
-
-                                    response = ServerCommand.INIT_GAME.name();
+                                        response = ServerCommand.INIT_GAME.name();
+                                    } else {
+                                        response = ServerCommand.INVALID + " Game " + gameId + " doesn't exist. Please try again.";
+                                        break;
+                                    }
                                 }
 
 
@@ -153,7 +157,6 @@ public class GameServer {
                                         response = ServerCommand.INVALID + " Missing <grid size> parameter. Please try again.";
                                         break;
                                     }
-                                    //TODO: creation logic
 
                                     int gridSize = Integer.parseInt(clientRequestParts[1]);
 
@@ -175,12 +178,12 @@ public class GameServer {
                                     gamesMap.put(gameId, new GameHandler(gameId, gridSize));
 
                                     System.out.println(ANSI_GREEN + "[Server " + SERVER_ID + "] \n"
-                                            + "     [Client " + CLIENT_ID + "] created [Game " + gameId +"]"+ ANSI_RESET);
+                                            + "     [Client " + CLIENT_ID + "] created [Game " + gameId + "]" + ANSI_RESET);
 
                                     GAME_ID = gameId;
                                     inGame = true;
 
-                                    response = ServerCommand.INIT_GAME.name();
+                                    response = ServerCommand.INIT_GAME.name();//TODO:Probably change
                                 }
                             }
 
