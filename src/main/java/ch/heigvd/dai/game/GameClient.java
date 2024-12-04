@@ -28,6 +28,7 @@ public class GameClient {
     private enum ServerCommand {
         INIT_GAME,
         GAME_LIST,
+        GAME_TABLE,
         INVALID
     }
 
@@ -64,7 +65,6 @@ public class GameClient {
                         ClientCommand command = ClientCommand.valueOf(userInputParts[0].toUpperCase());
 
 
-
                         switch (command) {
                             case LIST -> {
                                 request = ClientCommand.LIST.name();
@@ -76,6 +76,7 @@ public class GameClient {
                             case CREATE -> {
                                 //TODO: fix if one argument launch exept
                                 request = ClientCommand.CREATE + " " + userInputParts[1];
+                                //TODO: wait for srv and put quit msg ctrl C
 
                             }
                             case QUIT -> {
@@ -91,7 +92,6 @@ public class GameClient {
                     } else {
                         String[] userInputParts = userInput.split(" ", 2);
                         ClientCommand command = ClientCommand.valueOf(userInputParts[0].toUpperCase());
-
 
 
                         switch (command) {
@@ -140,10 +140,18 @@ public class GameClient {
                             inGame = true;
                             //TODO: maybe call fonction with while
                         }
+
                         case GAME_LIST -> {
                             String[] gamelist = serverResponseParts[1].split("¦");
                             for (String s : gamelist) {
                                 System.out.println(s);//TODO: finish
+                            }
+                        }
+
+                        case GAME_TABLE -> {
+                            String[] gameTable = serverResponseParts[1].split("/");
+                            for (String s : gameTable) {
+                                System.out.println(s);
                             }
                         }
 

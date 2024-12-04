@@ -38,6 +38,7 @@ public class GameServer {
     private enum ServerCommand {
         INIT_GAME,
         GAME_LIST,
+        GAME_TABLE,
         INVALID
     }
 
