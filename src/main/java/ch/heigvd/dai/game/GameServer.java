@@ -191,17 +191,22 @@ public class GameServer {
                             String[] clientRequestParts = clientRequest.split(" ", 3);
                             ClientCommand clientCommand = ClientCommand.valueOf(clientRequestParts[0]);
 
+                            //TODO: game table command
+                            // response = ServerCommand.GAME_TABLE +" "+ gamesMap.get(GAME_ID).getTable();
 
                             switch (clientCommand) {
                                 case QUITGAME -> {
                                     // commande to quit game
-                                    inGame = false;
+                                    //inGame = false;
                                 }
 
 
                                 case PLACE -> {
                                     // PLACE A 1
-
+                                    if (clientRequestParts.length < 3) {
+                                        response = ServerCommand.INVALID + " Wrong format. Please try again. Example : PLACE a 1";
+                                    }
+                                    // place logic
                                 }
                             }
                         }
@@ -255,7 +260,60 @@ public class GameServer {
         }
 
         String getTable() {//TODO: do logic
-            return null;
+
+            /* format
+               1   2   3
+            a  0 ¦ 0 ¦ 0
+              ---¦---¦---
+            b  0 ¦ 0 ¦ 0
+              ---¦---¦---
+            c  0 ¦ 0 ¦ 0
+             */
+
+            StringBuilder tableString = new StringBuilder();
+            for (int i = 1; i <= gridSize; i++) {
+                tableString.append("   ").append(i);
+            }
+            tableString.append("/");
+
+            char rowLabel = 'a';
+
+            for (int rows = 0; rows < gridSize; rows++) {
+                tableString.append(rowLabel).append("  ");
+
+                for (int cols = 0; cols < gridSize; cols++) {
+                    tableString.append(switch (table[rows][cols]) {
+                        case 1 -> "X";
+                        case 2 -> "O";
+                        default -> " ";
+                    });
+
+                    if(cols<gridSize-1) {
+                        tableString.append(" ¦ ");
+                    }
+
+                }
+
+                tableString.append("/  ");
+
+                if (rows < gridSize - 1) {
+
+                    for (int cols = 0; cols < gridSize; cols++) {
+                        tableString.append("---");
+
+                        if(cols<gridSize-1) {
+                            tableString.append("¦");
+                        }
+
+                    }
+                    tableString.append("/");
+                }
+
+                rowLabel++;
+            }
+
+
+            return tableString.toString();
         }
 
         int getGridSize() {

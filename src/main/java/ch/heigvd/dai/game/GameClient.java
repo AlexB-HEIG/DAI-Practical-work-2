@@ -101,9 +101,14 @@ public class GameClient {
 
                         switch (command) {
                             case PLACE -> {
+                                request = ClientCommand.PLACE.name();
+                                if (userInputParts.length > 1) {
+                                    request += " " + userInputParts[1];
+                                }
                             }
                             case QUITGAME -> {
-                                inGame = false;
+                                //inGame = false;
+                                request = ClientCommand.QUITGAME.name();
                             }
                             case HELP -> {
                                 helpInGame();
