@@ -29,6 +29,7 @@ public class GameClient {
         INIT_GAME,
         GAME_LIST,
         GAME_TABLE,
+        CONFIRMQUITGAME,
         INVALID
     }
 
@@ -105,6 +106,8 @@ public class GameClient {
                                 if (userInputParts.length > 1) {
                                     request += " " + userInputParts[1];
                                 }
+
+
                             }
                             case QUITGAME -> {
                                 //inGame = false;
@@ -164,6 +167,10 @@ public class GameClient {
                             for (String s : gameTable) {
                                 System.out.println(s);
                             }
+                        }
+
+                        case CONFIRMQUITGAME -> {
+                            inGame = false;//TODO: maybe more
                         }
 
                         case INVALID -> {

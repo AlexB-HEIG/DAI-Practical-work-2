@@ -39,6 +39,7 @@ public class GameServer {
         INIT_GAME,
         GAME_LIST,
         GAME_TABLE,
+        CONFIRMQUITGAME,
         INVALID
     }
 
@@ -139,6 +140,7 @@ public class GameServer {
                                     if (gamesMap.containsKey(gameId)) {
                                         GAME_ID = gameId;
                                         inGame = true;
+                                        gamesMap.get(GAME_ID).joinGame(CLIENT_ID);
 
                                         System.out.println(ANSI_GREEN + "[Server " + SERVER_ID + "] \n"
                                                 + "     [Client " + CLIENT_ID + "] join [Game " + gameId + "]" + ANSI_RESET);
@@ -175,7 +177,7 @@ public class GameServer {
                                     } while (gamesMap.containsKey(gameId));
 
 
-                                    gamesMap.put(gameId, new GameHandler(gameId, gridSize));
+                                    gamesMap.put(gameId, new GameHandler(gameId, gridSize, CLIENT_ID));
 
                                     System.out.println(ANSI_GREEN + "[Server " + SERVER_ID + "] \n"
                                             + "     [Client " + CLIENT_ID + "] created [Game " + gameId + "]" + ANSI_RESET);
@@ -188,7 +190,7 @@ public class GameServer {
                             }
 
                         } else {
-                            String[] clientRequestParts = clientRequest.split(" ", 3);
+                            String[] clientRequestParts = clientRequest.split(" ", 4);
                             ClientCommand clientCommand = ClientCommand.valueOf(clientRequestParts[0]);
 
                             //TODO: game table command
@@ -196,17 +198,44 @@ public class GameServer {
 
                             switch (clientCommand) {
                                 case QUITGAME -> {
-                                    // commande to quit game
-                                    //inGame = false;
+                                    int tmp = gamesMap.get(GAME_ID).quitGame(CLIENT_ID);
+
+                                    if (tmp != 0) {
+                                        //TODO: warn opponent
+                                    } else {
+                                        gamesMap.remove(GAME_ID);
+                                    }
+
+                                    GAME_ID = 0;
+                                    inGame = false;
+
+                                    response = ServerCommand.CONFIRMQUITGAME.name();
                                 }
 
 
                                 case PLACE -> {
-                                    // PLACE A 1
-                                    if (clientRequestParts.length < 3) {
-                                        response = ServerCommand.INVALID + " Wrong format. Please try again. Example : PLACE a 1";
+                                    if (clientRequestParts.length != 3 || clientRequestParts[1].length() > 1 || isNumeric(clientRequestParts[1]) || !isNumeric(clientRequestParts[2])) {
+                                        response = ServerCommand.INVALID + " Wrong format. Please try again. Example : PLACE A 1";
+                                    } else {
+
+                                        char tmp = clientRequestParts[1].toUpperCase().charAt(0);
+                                        int rows = tmp;
+                                        int cols = Integer.parseInt(clientRequestParts[2]);
+
+                                        if (rows < 65 || rows > 90 || cols < 1) {
+                                            response = ServerCommand.INVALID + " Wrong placement. Please try again.";
+                                        } else {
+                                            response = switch (gamesMap.get(GAME_ID).placePiece(rows, cols, CLIENT_ID)) {
+                                                case 1 -> ServerCommand.INVALID + " Please wait your turn to play.";
+                                                case 2 -> ServerCommand.INVALID + " Wrong placement, outside the grid.";
+                                                case 3 ->
+                                                        ServerCommand.INVALID + " Wrong placement, case already played.";
+                                                case 4 -> ServerCommand.INVALID + " Please wait for opponent.";
+                                                default ->
+                                                        ServerCommand.GAME_TABLE + " " + gamesMap.get(GAME_ID).getTable(); //TODO: put that somwhere else maybe
+                                            };
+                                        }
                                     }
-                                    // place logic
                                 }
                             }
                         }
@@ -243,23 +272,82 @@ public class GameServer {
         private int player2ID;
 
 
-        GameHandler(int gameId, int gridSize) {
+        GameHandler(int gameId, int gridSize, int playerID) {
             this.gameId = gameId;
             this.gridSize = gridSize;
             this.table = new int[gridSize][gridSize];
+            this.player1ID = playerID;
 
         }
 
 
-        void joinGame() {
-
+        void joinGame(int playerID) {
+            player2ID = playerID;
         }
 
-        void playGame() {
+        int quitGame(int playerID) {
 
+
+            //TODO: verif if player left if not destroy
+
+            if (player1ID == 0 || player2ID == 0) {
+                if (playerID == player1ID) {
+                    player1ID = 0;
+                    return 0;
+                } else {
+                    player2ID = 0;
+                    return 0;
+                }
+
+            } else {
+                if (playerID == player1ID) {
+                    player1ID = 0;
+                    return player2ID;
+                } else {
+                    player2ID = 0;
+                    return player1ID;
+                }
+            }
         }
 
-        String getTable() {//TODO: do logic
+        int getOpponentID(int playerID) {
+            return 0;
+        }
+
+        int placePiece(int row, int col, int playerID) {
+
+            if (player1ID == 0 || player2ID == 0) {
+                return 4;
+            }
+
+            if ((playerID == player1ID && turnOf) || (playerID == player2ID && !turnOf)) {
+                return 1;
+            }
+
+            int realRow = row - 65;
+            int realCol = col - 1;
+
+            if (realRow < 0 || realRow > gridSize - 1 || realCol < 0 || realCol > gridSize - 1) {
+                return 2;
+            }
+
+            if (table[realRow][realCol] != 0) {
+                return 3;
+            }
+
+
+            if (playerID == player1ID) {
+                table[realRow][realCol] = 1;
+                turnOf = true;
+            } else if (playerID == player2ID) {
+                table[realRow][realCol] = 2;
+                turnOf = false;
+            }
+            return 0;
+        }
+
+
+        String getTable() {
 
             /* format
                1   2   3
@@ -276,7 +364,7 @@ public class GameServer {
             }
             tableString.append("/");
 
-            char rowLabel = 'a';
+            char rowLabel = 'A';
 
             for (int rows = 0; rows < gridSize; rows++) {
                 tableString.append(rowLabel).append("  ");
@@ -288,10 +376,9 @@ public class GameServer {
                         default -> " ";
                     });
 
-                    if(cols<gridSize-1) {
+                    if (cols < gridSize - 1) {
                         tableString.append(" ¦ ");
                     }
-
                 }
 
                 tableString.append("/  ");
@@ -301,23 +388,28 @@ public class GameServer {
                     for (int cols = 0; cols < gridSize; cols++) {
                         tableString.append("---");
 
-                        if(cols<gridSize-1) {
+                        if (cols < gridSize - 1) {
                             tableString.append("¦");
                         }
-
                     }
                     tableString.append("/");
                 }
-
                 rowLabel++;
             }
-
-
             return tableString.toString();
         }
 
         int getGridSize() {
             return gridSize;
+        }
+    }
+
+    private static boolean isNumeric(String str) {
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 }
