@@ -3,11 +3,9 @@ package ch.heigvd.dai.game;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.IntStream;
 
 
 public class GameServer {
@@ -39,6 +37,7 @@ public class GameServer {
         INIT_GAME,
         GAME_LIST,
         GAME_TABLE,
+        WAIT_OPPONENT,
         CONFIRMQUITGAME,
         INVALID
     }
@@ -50,7 +49,7 @@ public class GameServer {
     public void launchServer() {
 
         try (ServerSocket serverSocket = new ServerSocket(PORT);
-             ExecutorService executor = Executors.newCachedThreadPool();) {
+             ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();) {
             System.out.println("[Server " + SERVER_ID + "] starting with id " + SERVER_ID);
             System.out.println("[Server " + SERVER_ID + "] listening on port " + PORT);
 
@@ -146,6 +145,8 @@ public class GameServer {
                                                 + "     [Client " + CLIENT_ID + "] join [Game " + gameId + "]" + ANSI_RESET);
 
                                         response = ServerCommand.INIT_GAME.name();
+                                        //TODO: init opponent
+
                                     } else {
                                         response = ServerCommand.INVALID + " Game " + gameId + " doesn't exist. Please try again.";
                                         break;
@@ -185,7 +186,7 @@ public class GameServer {
                                     GAME_ID = gameId;
                                     inGame = true;
 
-                                    response = ServerCommand.INIT_GAME.name();//TODO:Probably change
+                                    response = ServerCommand.WAIT_OPPONENT.name();
                                 }
                             }
 
