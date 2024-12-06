@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class GameClient {
@@ -20,6 +21,7 @@ public class GameClient {
     private static BufferedWriter socketOut;
 
     private static boolean inGame = false;
+    private static AtomicBoolean waitingResponse= new AtomicBoolean(false);
 
     private static final Object quitLock = new Object();
     private static final Object waitResponse = new Object();
@@ -39,8 +41,11 @@ public class GameClient {
         GAME_LIST,
         GAME_TABLE,
         WAIT_OPPONENT,
+        STANDARD_MESSAGE,
         CONFIRMQUITGAME,
-        INVALID
+        INVALID,
+        FIRSTOFCHAIN,
+        LASTOFCHAIN
     }
 
     public GameClient(String host, int port) {
@@ -138,6 +143,7 @@ public class GameClient {
                                     help();
                                     continue;
                                 }
+                                default -> System.out.println("Invalid command. Please try again.");
                             }
 
                         } else {
@@ -159,10 +165,14 @@ public class GameClient {
                                     helpInGame();
                                     continue;
                                 }
+                                default -> System.out.println("Invalid command. Please try again.");
                             }
                         }
 
                         if (request != null) {
+
+                        //    waitingResponse.set(true);
+
                             socketOut.write(request + "\n");
                             socketOut.flush();
 
@@ -209,12 +219,16 @@ public class GameClient {
                         String[] serverResponseParts = serverResponse.split(" ", 2);
                         ServerCommand serverCommand = ServerCommand.valueOf(serverResponseParts[0]);
 
+                      /*  if(!waitingResponse.get()) {
+                            System.out.println(" ");
+                        }*/
+
                         switch (serverCommand) {
                             case INIT_GAME -> {
                                 inGame = true;
                                 System.out.println(serverResponseParts[1]);
-                               // System.out.println("Opponent joined.");
-                                //TODO: maybe call fonction with while
+                                //System.out.print("\n> ");
+
                             }
 
                             case GAME_LIST -> {
@@ -234,21 +248,37 @@ public class GameClient {
                             case WAIT_OPPONENT -> {
                                 inGame = true;
                                 System.out.println(serverResponseParts[1]);
-                               // System.out.println("Waiting for opponent...");
+
+                            }
+                            case STANDARD_MESSAGE -> {
+                                System.out.println(serverResponseParts[1]);
+                                // System.out.print("\n> ");
                             }
 
                             case CONFIRMQUITGAME -> {
                                 inGame = false;//TODO: maybe more
+                                System.out.println(serverResponseParts[1]);
                             }
 
                             case INVALID -> {
                                 System.out.println(serverResponseParts[1]);
                             }
+                            case FIRSTOFCHAIN -> {System.out.println(" ");}
+                            case LASTOFCHAIN -> {System.out.print("\n> ");}
                         }
+
+                       /* if(!waitingResponse.get()) {
+                            System.out.print("\n> ");
+                        }
+
+                        waitingResponse.set(false);*/
+
+//TODO: fix cosmetic
 
                         synchronized (waitResponse) {
                             waitResponse.notify();
                         }
+
 
                     } catch (IllegalArgumentException e) {
                         //TODO: think

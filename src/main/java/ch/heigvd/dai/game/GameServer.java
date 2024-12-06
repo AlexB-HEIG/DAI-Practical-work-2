@@ -13,7 +13,7 @@ public class GameServer {
     private final int PORT;
     private static final int SERVER_ID = (int) (Math.random() * 1000000);
     private static ConcurrentHashMap<Integer, Socket> clientMap = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<Integer, BufferedWriter>  = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Integer, BufferedWriter> clientWriter = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<Integer, GameHandler> gamesMap = new ConcurrentHashMap<>();
 
     private static final String ANSI_RESET = "\u001B[0m";
@@ -39,8 +39,11 @@ public class GameServer {
         GAME_LIST,
         GAME_TABLE,
         WAIT_OPPONENT,
+        STANDARD_MESSAGE,
         CONFIRMQUITGAME,
-        INVALID
+        INVALID,
+        FIRSTOFCHAIN,
+        LASTOFCHAIN
     }
 
     public GameServer(int port) {
@@ -86,14 +89,16 @@ public class GameServer {
 
         @Override
         public void run() {
-            try (socket; // This allow to use try-with-resources with the socket
+            try (socket; // This allows to use try-with-resources with the socket
                  BufferedReader socketIn = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
                  BufferedWriter socketOut = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8))) {
 
+                clientWriter.put(CLIENT_ID, socketOut);
 
                 System.out.println(ANSI_BLUE + "[Server " + SERVER_ID + "] new client connected from "
                         + socket.getInetAddress().getHostAddress() + ":" + socket.getPort()
                         + "\n    using Client ID " + CLIENT_ID + ANSI_RESET);
+
 
                 while (!socket.isClosed()) {
 
@@ -132,9 +137,6 @@ public class GameServer {
                                         response = ServerCommand.INVALID + " Missing <game id> parameter. Please try again.";
                                         break;
                                     }
-                                    //TODO: join logic
-                                    // int gameId = Integer.parseInt(clientRequestParts[1]);
-                                    // lauch playgame
 
                                     int gameId = Integer.parseInt(clientRequestParts[1]);
                                     if (gamesMap.containsKey(gameId)) {
@@ -145,8 +147,23 @@ public class GameServer {
                                         System.out.println(ANSI_GREEN + "[Server " + SERVER_ID + "] \n"
                                                 + "     [Client " + CLIENT_ID + "] join [Game " + gameId + "]" + ANSI_RESET);
 
-                                        response = ServerCommand.INIT_GAME + "Opponent joined.";
-                                        //TODO: init opponent
+
+
+                                        sendToSocket(CLIENT_ID, ServerCommand.INIT_GAME + " Opponent joined.");
+                                        sendToSocket(CLIENT_ID, ServerCommand.FIRSTOFCHAIN.name());
+                                        sendToSocket(CLIENT_ID, ServerCommand.STANDARD_MESSAGE + " Opponent turn.");
+                                        sendToSocket(CLIENT_ID, ServerCommand.GAME_TABLE + " " + gamesMap.get(GAME_ID).getTable());
+                                        sendToSocket(CLIENT_ID, ServerCommand.LASTOFCHAIN.name());
+
+                                        sendToSocket(gamesMap.get(GAME_ID).getOpponentID(CLIENT_ID), ServerCommand.FIRSTOFCHAIN.name());
+                                        sendToSocket(gamesMap.get(GAME_ID).getOpponentID(CLIENT_ID), ServerCommand.INIT_GAME + " Opponent joined.");
+                                        sendToSocket(gamesMap.get(GAME_ID).getOpponentID(CLIENT_ID), ServerCommand.STANDARD_MESSAGE + " Your turn.");
+                                        sendToSocket(gamesMap.get(GAME_ID).getOpponentID(CLIENT_ID), ServerCommand.GAME_TABLE + " " + gamesMap.get(GAME_ID).getTable());
+                                        sendToSocket(gamesMap.get(GAME_ID).getOpponentID(CLIENT_ID), ServerCommand.LASTOFCHAIN.name());
+
+
+
+
 
 
                                     } else {
@@ -157,7 +174,6 @@ public class GameServer {
 
 
                                 case CREATE -> {
-
                                     if (clientRequestParts.length < 2) {
                                         response = ServerCommand.INVALID + " Missing <grid size> parameter. Please try again.";
                                         break;
@@ -188,7 +204,7 @@ public class GameServer {
                                     GAME_ID = gameId;
                                     inGame = true;
 
-                                    response = ServerCommand.WAIT_OPPONENT + "Waiting for opponent...";
+                                    response = ServerCommand.WAIT_OPPONENT + " Waiting for opponent...";
                                 }
                             }
 
@@ -196,15 +212,14 @@ public class GameServer {
                             String[] clientRequestParts = clientRequest.split(" ", 4);
                             ClientCommand clientCommand = ClientCommand.valueOf(clientRequestParts[0]);
 
-                            //TODO: game table command
-                            // response = ServerCommand.GAME_TABLE +" "+ gamesMap.get(GAME_ID).getTable();
-
                             switch (clientCommand) {
                                 case QUITGAME -> {
                                     int tmp = gamesMap.get(GAME_ID).quitGame(CLIENT_ID);
 
                                     if (tmp != 0) {
-                                        //TODO: warn opponent
+                                        sendToSocket(tmp, ServerCommand.STANDARD_MESSAGE + " Your opponent has left the game.");
+                                        sendToSocket(tmp, ServerCommand.STANDARD_MESSAGE + " " + ANSI_GREEN + "You win by forfeit." + ANSI_RESET);
+
                                     } else {
                                         gamesMap.remove(GAME_ID);
                                     }
@@ -212,7 +227,7 @@ public class GameServer {
                                     GAME_ID = 0;
                                     inGame = false;
 
-                                    response = ServerCommand.CONFIRMQUITGAME.name();
+                                    response = ServerCommand.CONFIRMQUITGAME + " Game quited.";
                                 }
 
 
@@ -228,15 +243,26 @@ public class GameServer {
                                         if (rows < 65 || rows > 90 || cols < 1) {
                                             response = ServerCommand.INVALID + " Wrong placement. Please try again.";
                                         } else {
-                                            response = switch (gamesMap.get(GAME_ID).placePiece(rows, cols, CLIENT_ID)) {
-                                                case 1 -> ServerCommand.INVALID + " Please wait your turn to play.";
-                                                case 2 -> ServerCommand.INVALID + " Wrong placement, outside the grid.";
-                                                case 3 ->
-                                                        ServerCommand.INVALID + " Wrong placement, case already played.";
-                                                case 4 -> ServerCommand.INVALID + " Please wait for opponent.";
-                                                default ->
-                                                        ServerCommand.GAME_TABLE + " " + gamesMap.get(GAME_ID).getTable(); //TODO: put that somwhere else maybe
-                                            };
+                                            switch (gamesMap.get(GAME_ID).placePiece(rows, cols, CLIENT_ID)) {
+                                                case -1 -> {
+                                                    response = ServerCommand.INVALID + " Please wait your turn to play.";
+                                                }
+                                                case -2 -> {
+                                                    response = ServerCommand.INVALID + " Wrong placement, outside the grid.";
+                                                }
+                                                case -3 -> {
+                                                    response = ServerCommand.INVALID + " Wrong placement, case already played.";
+                                                }
+                                                case -4 -> {
+                                                    response = ServerCommand.INVALID + " Please wait for opponent.";
+                                                }
+                                                default -> {
+                                                    response = ServerCommand.GAME_TABLE + " " + gamesMap.get(GAME_ID).getTable();
+                                                    sendToSocket(gamesMap.get(GAME_ID).getOpponentID(CLIENT_ID),ServerCommand.STANDARD_MESSAGE + " Opponent placed at "+ tmp+" "+clientRequestParts[2]);
+                                                    sendToSocket(gamesMap.get(GAME_ID).getOpponentID(CLIENT_ID), ServerCommand.GAME_TABLE + " " + gamesMap.get(GAME_ID).getTable());
+                                                }
+                                            }
+                                            ;
                                         }
                                     }
                                 }
@@ -249,25 +275,30 @@ public class GameServer {
                         response = ServerCommand.INVALID + "Unknown command. Please try again.";
                     }
 
-                    socketOut.write(response + "\n");
-                    socketOut.flush();
+                    sendToSocket(CLIENT_ID, response);
+
+                    // socketOut.write(response + "\n");
+                    // socketOut.flush();
                 }
 
                 System.out.println("[Server " + SERVER_ID + "] closing connection");
+
+                clientMap.remove(CLIENT_ID);
+                clientWriter.remove(CLIENT_ID);
+
+
             } catch (Exception e) {
                 System.out.println("[Server " + SERVER_ID + "] exception: " + e);
             }
         }
 
 
-
-
-        void sendToSocket(Socket sock) {
-            try (BufferedWriter socketOut = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream(), StandardCharsets.UTF_8))) {
-
-
-
-
+        private void sendToSocket(int clientId, String message) {
+            try {
+                if (message != null) {
+                    clientWriter.get(clientId).write(message + "\n");
+                    clientWriter.get(clientId).flush();
+                }
             } catch (Exception e) {
                 System.out.println("[Server " + SERVER_ID + "] exception: " + e);
             }
@@ -303,10 +334,6 @@ public class GameServer {
         }
 
         int quitGame(int playerID) {
-
-
-            //TODO: verif if player left if not destroy
-
             if (player1ID == 0 || player2ID == 0) {
                 if (playerID == player1ID) {
                     player1ID = 0;
@@ -328,28 +355,36 @@ public class GameServer {
         }
 
         int getOpponentID(int playerID) {
-            return 0;
+            if (player1ID != 0 && player2ID != 0) {
+                if (playerID == player1ID) {
+                    return player2ID;
+                } else {
+                    return player1ID;
+                }
+            } else {
+                return 0;
+            }
         }
 
         int placePiece(int row, int col, int playerID) {
 
             if (player1ID == 0 || player2ID == 0) {
-                return 4;
+                return -4;
             }
 
             if ((playerID == player1ID && turnOf) || (playerID == player2ID && !turnOf)) {
-                return 1;
+                return -1;
             }
 
             int realRow = row - 65;
             int realCol = col - 1;
 
             if (realRow < 0 || realRow > gridSize - 1 || realCol < 0 || realCol > gridSize - 1) {
-                return 2;
+                return -2;
             }
 
             if (table[realRow][realCol] != 0) {
-                return 3;
+                return -3;
             }
 
 
@@ -360,9 +395,17 @@ public class GameServer {
                 table[realRow][realCol] = 2;
                 turnOf = false;
             }
-            return 0;
+
+
+            return checkWin();
         }
 
+        private int checkWin() {
+            //TODO: if win retrun 1
+            //  if draw return 2
+            //  else return 0
+
+        }
 
         String getTable() {
 
