@@ -13,6 +13,7 @@ public class GameServer {
     private final int PORT;
     private static final int SERVER_ID = (int) (Math.random() * 1000000);
     private static ConcurrentHashMap<Integer, Socket> clientMap = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Integer, BufferedWriter>  = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<Integer, GameHandler> gamesMap = new ConcurrentHashMap<>();
 
     private static final String ANSI_RESET = "\u001B[0m";
@@ -144,8 +145,9 @@ public class GameServer {
                                         System.out.println(ANSI_GREEN + "[Server " + SERVER_ID + "] \n"
                                                 + "     [Client " + CLIENT_ID + "] join [Game " + gameId + "]" + ANSI_RESET);
 
-                                        response = ServerCommand.INIT_GAME.name();
+                                        response = ServerCommand.INIT_GAME + "Opponent joined.";
                                         //TODO: init opponent
+
 
                                     } else {
                                         response = ServerCommand.INVALID + " Game " + gameId + " doesn't exist. Please try again.";
@@ -186,7 +188,7 @@ public class GameServer {
                                     GAME_ID = gameId;
                                     inGame = true;
 
-                                    response = ServerCommand.WAIT_OPPONENT.name();
+                                    response = ServerCommand.WAIT_OPPONENT + "Waiting for opponent...";
                                 }
                             }
 
@@ -252,6 +254,20 @@ public class GameServer {
                 }
 
                 System.out.println("[Server " + SERVER_ID + "] closing connection");
+            } catch (Exception e) {
+                System.out.println("[Server " + SERVER_ID + "] exception: " + e);
+            }
+        }
+
+
+
+
+        void sendToSocket(Socket sock) {
+            try (BufferedWriter socketOut = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream(), StandardCharsets.UTF_8))) {
+
+
+
+
             } catch (Exception e) {
                 System.out.println("[Server " + SERVER_ID + "] exception: " + e);
             }

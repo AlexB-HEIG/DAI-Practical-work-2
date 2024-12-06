@@ -212,7 +212,8 @@ public class GameClient {
                         switch (serverCommand) {
                             case INIT_GAME -> {
                                 inGame = true;
-                                System.out.println("Opponent joined.");
+                                System.out.println(serverResponseParts[1]);
+                               // System.out.println("Opponent joined.");
                                 //TODO: maybe call fonction with while
                             }
 
@@ -232,7 +233,8 @@ public class GameClient {
 
                             case WAIT_OPPONENT -> {
                                 inGame = true;
-                                System.out.println("Waiting for opponent...");
+                                System.out.println(serverResponseParts[1]);
+                               // System.out.println("Waiting for opponent...");
                             }
 
                             case CONFIRMQUITGAME -> {
