@@ -148,7 +148,6 @@ public class GameServer {
                                                 + "     [Client " + CLIENT_ID + "] join [Game " + gameId + "]" + ANSI_RESET);
 
 
-
                                         sendToSocket(CLIENT_ID, ServerCommand.INIT_GAME + " Opponent joined.");
                                         sendToSocket(CLIENT_ID, ServerCommand.FIRSTOFCHAIN.name());
                                         sendToSocket(CLIENT_ID, ServerCommand.STANDARD_MESSAGE + " Opponent turn.");
@@ -160,10 +159,6 @@ public class GameServer {
                                         sendToSocket(gamesMap.get(GAME_ID).getOpponentID(CLIENT_ID), ServerCommand.STANDARD_MESSAGE + " Your turn.");
                                         sendToSocket(gamesMap.get(GAME_ID).getOpponentID(CLIENT_ID), ServerCommand.GAME_TABLE + " " + gamesMap.get(GAME_ID).getTable());
                                         sendToSocket(gamesMap.get(GAME_ID).getOpponentID(CLIENT_ID), ServerCommand.LASTOFCHAIN.name());
-
-
-
-
 
 
                                     } else {
@@ -256,9 +251,17 @@ public class GameServer {
                                                 case -4 -> {
                                                     response = ServerCommand.INVALID + " Please wait for opponent.";
                                                 }
+                                                case 1 -> {
+                                                    response = ServerCommand.STANDARD_MESSAGE + " " + ANSI_GREEN + "You won." + ANSI_RESET;
+                                                    sendToSocket(gamesMap.get(GAME_ID).getOpponentID(CLIENT_ID), ServerCommand.STANDARD_MESSAGE + " " + ANSI_RED + "You lost." + ANSI_RESET);
+                                                }
+                                                case 2 -> {
+                                                    response = ServerCommand.STANDARD_MESSAGE + " " + ANSI_YELLOW + "It's a tie." + ANSI_RESET;
+                                                    sendToSocket(gamesMap.get(GAME_ID).getOpponentID(CLIENT_ID), response);
+                                                }
                                                 default -> {
                                                     response = ServerCommand.GAME_TABLE + " " + gamesMap.get(GAME_ID).getTable();
-                                                    sendToSocket(gamesMap.get(GAME_ID).getOpponentID(CLIENT_ID),ServerCommand.STANDARD_MESSAGE + " Opponent placed at "+ tmp+" "+clientRequestParts[2]);
+                                                    sendToSocket(gamesMap.get(GAME_ID).getOpponentID(CLIENT_ID), ServerCommand.STANDARD_MESSAGE + " Opponent placed at " + tmp + " " + clientRequestParts[2]);
                                                     sendToSocket(gamesMap.get(GAME_ID).getOpponentID(CLIENT_ID), ServerCommand.GAME_TABLE + " " + gamesMap.get(GAME_ID).getTable());
                                                 }
                                             }
@@ -397,15 +400,14 @@ public class GameServer {
             }
 
 
-            return checkWin();
-        }
-
-        private int checkWin() {
             //TODO: if win retrun 1
             //  if draw return 2
             //  else return 0
 
+
+            return 0;
         }
+
 
         String getTable() {
 
