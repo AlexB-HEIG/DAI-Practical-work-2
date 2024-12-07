@@ -21,7 +21,7 @@ public class GameClient {
     private static BufferedWriter socketOut;
 
     private static boolean inGame = false;
-    private static AtomicBoolean waitingResponse= new AtomicBoolean(false);
+    private static AtomicBoolean expectingResponse = new AtomicBoolean(false);
 
     private static final Object quitLock = new Object();
     private static final Object waitResponse = new Object();
@@ -171,7 +171,7 @@ public class GameClient {
 
                         if (request != null) {
 
-                        //    waitingResponse.set(true);
+                            expectingResponse.set(true);
 
                             socketOut.write(request + "\n");
                             socketOut.flush();
@@ -198,13 +198,16 @@ public class GameClient {
 
         @Override
         public void run() {
+
+            boolean commandChain = false;
+
             try {
                 while (!socket.isClosed()) {
 
-                    String serverResponse = socketIn.readLine();//TODO: fix crach from command quit
+                    String serverResponse = socketIn.readLine();
 
                     if (serverResponse == null) {
-                        System.out.println(ANSI_RED
+                        System.out.println("\n" + ANSI_RED
                                 + "[Client " + CLIENT_ID + "] Server unexpectedly closed."
                                 + ANSI_RESET);
 
@@ -219,16 +222,11 @@ public class GameClient {
                         String[] serverResponseParts = serverResponse.split(" ", 2);
                         ServerCommand serverCommand = ServerCommand.valueOf(serverResponseParts[0]);
 
-                      /*  if(!waitingResponse.get()) {
-                            System.out.println(" ");
-                        }*/
 
                         switch (serverCommand) {
                             case INIT_GAME -> {
                                 inGame = true;
                                 System.out.println(serverResponseParts[1]);
-                                //System.out.print("\n> ");
-
                             }
 
                             case GAME_LIST -> {
@@ -252,7 +250,6 @@ public class GameClient {
                             }
                             case STANDARD_MESSAGE -> {
                                 System.out.println(serverResponseParts[1]);
-                                // System.out.print("\n> ");
                             }
 
                             case CONFIRMQUITGAME -> {
@@ -263,20 +260,29 @@ public class GameClient {
                             case INVALID -> {
                                 System.out.println(serverResponseParts[1]);
                             }
-                            case FIRSTOFCHAIN -> {System.out.println(" ");}
-                            case LASTOFCHAIN -> {System.out.print("\n> ");}
+                            case FIRSTOFCHAIN -> {
+                                if (!expectingResponse.get()) {
+                                    System.out.println(" ");
+                                }
+                                commandChain = true;
+
+                            }
+                            case LASTOFCHAIN -> {
+
+                                if (!expectingResponse.get()) {
+                                    System.out.print("\n> ");
+                                }
+                                commandChain = false;
+                            }
                         }
 
-                       /* if(!waitingResponse.get()) {
-                            System.out.print("\n> ");
-                        }
 
-                        waitingResponse.set(false);*/
+                        if (!commandChain) {
+                            expectingResponse.set(false);
 
-//TODO: fix cosmetic
-
-                        synchronized (waitResponse) {
-                            waitResponse.notify();
+                            synchronized (waitResponse) {
+                                waitResponse.notify();
+                            }
                         }
 
 
@@ -299,6 +305,46 @@ public class GameClient {
         System.out.println(" " + ClientCommand.CREATE + " <grid size> - Create a new game with the given grid size.");
         System.out.println(" " + ClientCommand.QUIT + " - Close the connection to the server.");
         System.out.println(" " + ClientCommand.HELP + " - Display this help message.");
+
+
+        //juste for test
+       /* final String ANSI_RESET = "\u001B[0m";
+        final String ANSI_BLACK = "\u001B[30m";
+        final String ANSI_RED = "\u001B[31m";
+        final String ANSI_GREEN = "\u001B[32m";
+        final String ANSI_YELLOW = "\u001B[33m";
+        final String ANSI_BLUE = "\u001B[34m";
+        final String ANSI_PURPLE = "\u001B[35m";
+        final String ANSI_CYAN = "\u001B[36m";
+        final String ANSI_WHITE = "\u001B[37m";
+
+        final String ANSI_BRIGHT_BLACK = "\u001B[30;1m";
+        final String ANSI_BRIGHT_RED = "\u001B[31;1m";
+        final String ANSI_BRIGHT_GREEN = "\u001B[32;1m";
+        final String ANSI_BRIGHT_YELLOW = "\u001B[33;1m";
+        final String ANSI_BRIGHT_BLUE = "\u001B[34;1m";
+        final String ANSI_BRIGHT_PURPLE = "\u001B[35;1m";
+        final String ANSI_BRIGHT_CYAN = "\u001B[36;1m";
+        final String ANSI_BRIGHT_WHITE = "\u001B[37;1m";
+
+        System.out.println(ANSI_BLACK + "BLACK");
+        System.out.println(ANSI_RED + "RED");
+        System.out.println(ANSI_GREEN + "GREEN");
+        System.out.println(ANSI_YELLOW + "YELLOW");
+        System.out.println(ANSI_BLUE + "BLUE");
+        System.out.println(ANSI_PURPLE + "PURPLE");
+        System.out.println(ANSI_CYAN + "CYAN");
+        System.out.println(ANSI_WHITE + "WHITE");
+        System.out.println(ANSI_BRIGHT_BLACK + "BRIGHT_BLACK");
+        System.out.println(ANSI_BRIGHT_RED + "BRIGHT_RED");
+        System.out.println(ANSI_BRIGHT_GREEN + "BRIGHT_GREEN");
+        System.out.println(ANSI_BRIGHT_YELLOW + "BRIGHT_YELLOW");
+        System.out.println(ANSI_BRIGHT_BLUE + "BRIGHT_BLUE");
+        System.out.println(ANSI_BRIGHT_PURPLE + "BRIGHT_PURPLE");
+        System.out.println(ANSI_BRIGHT_CYAN + "BRIGHT_CYAN");
+        System.out.println(ANSI_BRIGHT_WHITE + "BRIGHT_WHITE");*/
+        // juste for test end
+
     }
 
     private static void helpInGame() {
