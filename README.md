@@ -84,7 +84,7 @@ Go get our package on [placeholder](https://github.com/LisaGorgerat?tab=packages
  
 To build the image, go in the folder of the app and use the command:
 ```sh
-docker build -t <app_name>
+docker build -t <app_name> .
 ```
 
 ## Usage
