@@ -83,25 +83,11 @@ loop
                 s -> c2:LASTOFCHAIN
     end
 
-
-
 end
 
-    c1->s: QUITGAME
-    c2->s: QUITGAME
+    c1->s: PLACE <row> <column>
+    s->c1: ERROR -5
 
-== Quit ==
-
-note over c1, c2
-If the window is closed, the connection is automatically cut.
-end note
-
-c1->s: QUIT
-c1<-->s: The connection is closed
-
-
-c2->s: QUIT
-c2<-->s: The connection is closed
 
 
 

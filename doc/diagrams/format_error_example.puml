@@ -16,27 +16,35 @@ end note
 c1->s : Establish connection
 c1<-->s : Connection established
 
-c1->s: JOIN Player1
-s->c1: OK
-
 c2->s : Establish connection
 c2<-->s : Connection established
 
-c2->s: JOIN Player2
-s->c2: OK
+
+== Create game ==
+
+c1->s: CREATE <size>
+s->c1: WAITING_OPPONENT
 
 == List games available ==
 
-c1->s: LIST
-s->c1: GAME_LIST <list of games>
+c2->s: LIST
+s->c2: GAME_LIST
 
-== Game start ==
+c2->s: JOIN <id>
 
-c1->s : Create board
-s->c1: OK
+s->c2: FIRSTOFCHAIN
+s->c2: GAME_INIT
+s->c2: STANDARD_MESSAGE
+s->c2: GAME_TABLE
+s->c2: LASTOFCHAIN
 
+s->c1: FIRSTOFCHAIN
+s->c1: GAME_INIT
+s->c1: STANDARD_MESSAGE
+s->c1: GAME_TABLE
+s->c1: LASTOFCHAIN
 == Wrong grid selection format ==
-c1->s: Player 1 make a move
+c1->s: PLACE <row> <column> (already played)
 s->c1: ERROR 1
 
 

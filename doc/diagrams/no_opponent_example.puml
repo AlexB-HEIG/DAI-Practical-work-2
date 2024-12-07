@@ -1,6 +1,6 @@
 @startuml
 
-title "The size for the board is not valid"
+title "No opponent exemple"
 
 participant "Client 1" as c1
 participant "Server" as s
@@ -16,13 +16,16 @@ end note
 c1->s : Establish connection
 c1<-->s : Connection established
 
-c2->s : Establish connection
-c2<-->s : Connection established
 
-== Create game with a wrong size ==
+== Create game ==
 
 c1->s: CREATE <size>
-s->c1: ERROR 2
+s->c1: WAITING_OPPONENT
+
+
+== grid placement already filled ==
+c1->s: PLACE <row> <column> already filled
+s->c1: ERROR -4
 
 
 

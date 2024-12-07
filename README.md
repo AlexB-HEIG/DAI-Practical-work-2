@@ -115,15 +115,41 @@ docker run --rm -it --network <network_name> --name <img_name> <container_name> 
 
 Otherwise, you can use the terminal with:
 ````sh
-java -jar target/DAI-Practical-work-2-1.0-SNAPSHOT.jar client <host> <port>
-java -jar target/DAI-Practical-work-2-1.0-SNAPSHOT.jar server <port> 
+java -jar target/DAI-Practical-work-2-1.0-SNAPSHOT.jar client <host> 
+java -jar target/DAI-Practical-work-2-1.0-SNAPSHOT.jar server 
 ````
 or with the premades configs:
 
-![start server]()
+![start server](doc/img/preconfig_server.png)
 
-![start client]()
+![start client](doc/img/preconfig_client.png)
 
 ## Demonstration
 
+### Local
 
+For the server, we initiate it:
+![server point of view](doc/img/server_local.png)
+
+For the first client, we initiate it and create the game:
+![client 1 part 1](doc/img/client1_part1.png)
+![client 1 part 2](doc/img/client1_part2.png)
+![client 1 part 3](doc/img/client1_part3.png)
+
+For the second client, we initiate it and we join the game:
+![client 2 part 1](doc/img/client2_part1.png)
+![client 2 part 2](doc/img/client2_part2.png)
+![client 2 part 3](doc/img/client2_part3.png)
+
+### From 2 containers
+
+We first create the network:
+
+
+We initiate the server:
+
+
+For the first client, we initiate it and create the game:
+
+
+For the second client, we initiate it and we join the game:

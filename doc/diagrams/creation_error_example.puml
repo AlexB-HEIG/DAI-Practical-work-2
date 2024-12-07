@@ -1,6 +1,6 @@
 @startuml
 
-title "The size for the board is not valid"
+title "The size for the board is not specified"
 
 participant "Client 1" as c1
 participant "Server" as s
@@ -19,10 +19,10 @@ c1<-->s : Connection established
 c2->s : Establish connection
 c2<-->s : Connection established
 
-== Create game with a wrong size ==
+== Create game without size ==
 
-c1->s: CREATE <size>
-s->c1: ERROR 2
+c1->s: CREATE
+s->c1: ERROR 1
 
 
 

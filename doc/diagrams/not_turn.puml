@@ -1,15 +1,14 @@
 @startuml
 
-title "A Player try to join a game that is already full"
+title "Not the client's turn example"
 
 participant "Client 1" as c1
 participant "Server" as s
 participant "Client 2" as c2
-participant "Client 3" as c3
 
 == Join the server ==
 
-note over c1, c3
+note over c1, c2
 The socket is instanciated and the connection is
 automatically established.
 end note
@@ -20,8 +19,6 @@ c1<-->s : Connection established
 c2->s : Establish connection
 c2<-->s : Connection established
 
-c3->s : Establish connection
-c3<-->s : Connection established
 
 == Create game ==
 
@@ -47,9 +44,10 @@ s->c1: STANDARD_MESSAGE
 s->c1: GAME_TABLE
 s->c1: LASTOFCHAIN
 
-== A Player try to join a game that is already full ==
+== grid placement already filled ==
+c2->s: PLACE <row> <column>
+s->c1: ERROR -1
 
-c3->s: JOIN Player3
-s->c3: ERROR 1
+
 
 @enduml
