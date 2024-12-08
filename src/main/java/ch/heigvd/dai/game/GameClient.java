@@ -7,12 +7,27 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
+/**
+ * A client application that connects to a game server.
+ * It supports various commands to interact with the server, such as listing, joining and creating a game.
+ * It can also place markers and quit a game.
+ *
+ * The client communicates with the server over a socket, using two threads: one to handle the
+ * server responses and another to manage user input from the terminal.
+ * Commands are processed asynchronously, and the client is designed to handle multiple states
+ * such as waiting for a response or playing a game.
+ *
+ * @author Alex Berberat
+ * @author Lisa Gorgerat
+ */
 public class GameClient {
     private final String HOST;
     private final int PORT;
     private static final int CLIENT_ID = (int) (Math.random() * 1000000);
 
-    // ANSI text format
+    /**
+     * ANSI codes for formatting console text output.
+     */
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_RED = "\u001B[31m";
     private static final String ANSI_BRIGHT_YELLOW = "\u001B[33;1m";
@@ -28,8 +43,10 @@ public class GameClient {
 
     private static final AtomicBoolean expectingResponse = new AtomicBoolean(false);
 
+    // Synchronizer Object
     private static final Object quitLock = new Object();
     private static final Object waitResponse = new Object();
+
 
     private enum ClientCommand {
         LIST,
@@ -54,11 +71,23 @@ public class GameClient {
         ENDGAME_MESSAGE
     }
 
+
+    /**
+     * Instantiates a new Game client.
+     *
+     * @param host the server address
+     * @param port the server port
+     */
     public GameClient(String host, int port) {
         this.HOST = host;
         this.PORT = port;
     }
 
+    /**
+     * Launch client.
+     * Create the socket and socket buffers.
+     * Start the two threads
+     */
     public void launchClient() {
         System.out.println("[Client " + CLIENT_ID + "] Starting with id " + CLIENT_ID);
         System.out.println("[Client " + CLIENT_ID + "] Connecting to " + HOST + ":" + PORT);
@@ -98,8 +127,13 @@ public class GameClient {
         }
     }
 
-
+    /**
+     * Handles terminal input, processes commands, and sends requests to the server.
+     */
     private static class TerminalHandler implements Runnable {
+        /**
+         * Instantiates a new Terminal handler.
+         */
         TerminalHandler() {
         }
 
@@ -190,8 +224,14 @@ public class GameClient {
         }
     }
 
-
+    /**
+     * Handles server responses and processes the commands.
+     * Updates the client state based on the server messages.
+     */
     private static class ServerHandler implements Runnable {
+        /**
+         * Instantiates a new Server handler.
+         */
         ServerHandler() {
         }
 
@@ -288,6 +328,9 @@ public class GameClient {
         }
     }
 
+    /**
+     * Displays a help message for commands available before starting a game.
+     */
     private static void help() {
         System.out.println("Usage:");
         System.out.println(" " + ClientCommand.LIST + " - Display the list of available games.");
@@ -297,6 +340,9 @@ public class GameClient {
         System.out.println(" " + ClientCommand.HELP + " - Display this help message.");
     }
 
+    /**
+     * Displays a help message for commands available during an ongoing game.
+     */
     private static void helpInGame() {
         System.out.println("Usage:");
         System.out.println(" " + ClientCommand.PLACE + " <row> <column> - Place a marker at the specified position.");
