@@ -6,6 +6,9 @@ import java.io.File;
 
 import picocli.CommandLine;
 
+/**
+ * Main of the application to initialize a command line and calculate execution time
+ */
 public class Main {
     public static void main(String[] args) {
         // Define command name - source: https://stackoverflow.com/a/11159435
