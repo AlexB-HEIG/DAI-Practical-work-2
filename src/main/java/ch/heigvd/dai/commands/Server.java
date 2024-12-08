@@ -11,29 +11,24 @@ import java.net.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * This class is the Server sub command
+ * It implements the standard command and definition of its options, parameters and subcommands.
+ *
+ * @author Alex Berberat
+ * @author Lisa Gorgerat
+ */
 @CommandLine.Command(name = "server", description = "Start the server part of the network game.")
 public class Server implements Callable<Integer> {
 
+    // Definition of the option for the port
     @CommandLine.Option(
             names = {"-p", "--port"},
             description = "Port to use (default: ${DEFAULT-VALUE}).",
             defaultValue = "6433")
     protected int port;
 
-    /*
-    // Definition of the parameter for board size
-    @CommandLine.Option(
-            names = {"-s", "--size"},
-            description = "The size of the board wanted (max 9).",
-            defaultValue = "3")
-    protected int BoardSize;
-
-    public int getBoardSize() {
-        return BoardSize;
-    }
-
-     */
-
+    // Function to launch the server with the value obtained from the option
     @Override
     public Integer call() throws IOException {
         GameServer server = new GameServer(port);
