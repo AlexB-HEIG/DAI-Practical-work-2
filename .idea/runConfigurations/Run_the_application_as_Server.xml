@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Initiate server" type="Application" factoryName="Application">
+  <configuration default="false" name="Run the application as Server" type="Application" factoryName="Application">
     <option name="ALTERNATIVE_JRE_PATH" value="temurin-21 (WSL)" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="ch.heigvd.dai.Main" />

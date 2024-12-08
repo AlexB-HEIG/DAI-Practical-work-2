@@ -1,10 +1,9 @@
-# Application protocol
-
+# Application protocol TicTacToe
 ## Table of content
-   -[Section 1 - Overview](#section-1---overview)  
-   -[Section 2 - Transport protocol](#section-2---transport-protocol)  
-   -[Section 3 - Messages](#section-3---messages)  
-   -[Section 4 - Examples](#section-4---examples)
+- [Section 1 - Overview](#section-1---overview)  
+- [Section 2 - Transport protocol](#section-2---transport-protocol)  
+- [Section 3 - Messages](#section-3---messages)  
+- [Section 4 - Examples](#section-4---examples)
 
 ## Section 1 - Overview
 
@@ -14,14 +13,24 @@ The "Tic Tac Toe" protocol is a communication protocol that allows clients to pl
 
 The "Tic Tac Toe" protocol is a text transport protocol. It uses the TCP transport protocol to ensure the reliability of data transmission. The port it uses is the port number 6433.  
 
-Every message must be encoded in UTF-8. The messages are treated as text messages.
+Every message must be encoded in UTF-8 and delimited by a newline character (`\n`). The messages are treated as text messages.
 
-The initial connection must be established by one of the clients, he is attributed Player 1.
+The initial connection must be established by the clients.
 
-Once the connection is estalibshed, the player 1 choose the size of the board(min 3 and max 9).
+Once the connection is estalibshed, the client is attributed an ID.
+
+Another client can connect to the same server and will be attributed another ID.
+
+> [!NOTE]
+> For simplicity 
+
+
+the player 1 choose the size of the board(min 3 and max 9).
 The board is generated.
 
-Another client can connect to the same server and will be attributed Player 2.
+ Player 2.
+
+
 
 A loop will initiate, where:
 - A player will make a move 
