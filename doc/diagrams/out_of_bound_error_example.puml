@@ -33,15 +33,15 @@ s->c2: GAME_LIST <text> <gameID1> <gameID2> ...
 c2->s: JOIN <id>
 
 s->c2: FIRSTOFCHAIN
-s->c2: GAME_INIT
-s->c2: STANDARD_MESSAGE
-s->c2: GAME_TABLE
+s->c2: GAME_INIT <text>
+s->c2: STANDARD_MESSAGE <text>
+s->c2: GAME_TABLE <text>
 s->c2: LASTOFCHAIN
 
 s->c1: FIRSTOFCHAIN
-s->c1: GAME_INIT
-s->c1: STANDARD_MESSAGE
-s->c1: GAME_TABLE
+s->c1: GAME_INIT <text>
+s->c1: STANDARD_MESSAGE <text>
+s->c1: GAME_TABLE <text>
 s->c1: LASTOFCHAIN
 
 == Out of Bound grid selection ==
