@@ -159,7 +159,7 @@ java -jar target/DAI-Practical-work-2-1.0-SNAPSHOT.jar server
 > Note that you will need to have multiple terminal opened at the same time to be able to initial all the needed instance of the program.
 
 
-You can also use the premade configs:
+You can also use the premade configs:  
 ![config](doc/img/preconfig.png)
 
 
