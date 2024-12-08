@@ -20,11 +20,11 @@ c1<-->s : Connection established
 == Create game ==
 
 c1->s: CREATE <size>
-s->c1: WAITING_OPPONENT
+s->c1: WAITING_OPPONENT <text>
 
 
-== grid placement already filled ==
-c1->s: PLACE <row> <column> already filled
+== No opponent yet ==
+c1->s: PLACE <row> <column>
 s->c1: ERROR -4
 
 

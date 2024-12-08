@@ -23,12 +23,12 @@ c2<-->s : Connection established
 == Create game ==
 
 c1->s: CREATE <size>
-s->c1: WAITING_OPPONENT
+s->c1: WAITING_OPPONENT <text>
 
 == List games available ==
 
 c2->s: LIST
-s->c2: GAME_LIST
+s->c2: GAME_LIST <text> <gameID1> <gameID2> ...
 
 c2->s: JOIN <id>
 
