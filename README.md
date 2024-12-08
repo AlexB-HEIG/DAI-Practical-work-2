@@ -75,19 +75,44 @@ Or you can use _Package application as JAR file_ configuration file to build eas
 To use the docker image of our game, you first need to ensure that docker is installed on your machine.  
 If that's not the case, please go to the official website ([Dockerdocs](https://docs.docker.com/engine/)) and follow the instruction for the version you need.
 
-### Recommendation
-
 ### Setup
 #### Get the package
 
-Go get our package on [placeholder](https://github.com/LisaGorgerat?tab=packages)
+You can find our package at [this link.](https://github.com/users/LisaGorgerat/packages/container/package/practical-work-2)
+
+or use this command:
+````sh
+docker pull ghcr.io/lisagorgerat/practical-work-2:latest
+````
 
 #### Build the application
- 
-To build the image, go into the folder of the app and use the command:
+If you were to change our application, you will need to build it again and publish it on your account.
+
+To build the app:
+
+Go into the folder of the app and use the command:
 ```sh
-docker build -t <app_name> .
+docker build -t practical-work-2 .
 ```
+
+To publish the container on GitHub:
+
+1. You first need to connect to your account:
+````sh
+docker login ghcr.io -u <username>
+````
+
+2. You need to tag the image:
+````sh
+# Tag the image with the correct format
+docker tag practical-work-2 ghcr.io/<username>/practical-work-2:latest
+````
+
+3. You publish the container on your account:
+````sh
+docker push ghcr.io/<username>/practical-work-2
+````
+
 
 ## Usage
 Once the app is built, you can run it.
@@ -107,16 +132,23 @@ docker network ls
 
 Then you need to run each container:
 
-- the first one:
+- For the server:
 ````sh
-docker run --rm -it --network <network_name> --name <container_name> <img_name> -l <port>
+docker run --rm -it --network <network name> --name <container name> ghcr.io/lisagorgerat/practical-work-2 server -p=<port>
 ````
 
-- the second one:
+- the first client:
 ````sh
-docker run --rm -it --network <network_name> --name <img_name> <container_name> <port>
+docker run --rm -it --network <network name> --name <client 1 container name> ghcr.io/lisagorgerat/practical-work-2 client -H=<server container name> -p=<port>
 ````
 
+- the second client:
+````sh
+docker run --rm -it --network <network name> --name <client 2 container name> ghcr.io/lisagorgerat/practical-work-2 client -H=<server container name> -p=<port>
+````
+> [!NOTE]
+> The port must be the same every time.
+> The demonstration bellow can help, if your having trouble visualizing the arguments.
 
 #### Without Docker 
 You can also run the app directly on your computer. For that you need to build the jar file and then use the following command in the terminal : 
@@ -137,6 +169,7 @@ You can also use the premade configs:
 
 
 ## Demonstration
+Do not forget to build the project first.
 ### On localhost without docker
 We begin by starting the server using : 
 ```sh
@@ -168,12 +201,31 @@ For the second client, we initiate it and we join the game:
 ### With 3 docker containers
 
 We first create the network:
+![network creation](doc/img/network.png)
 
+We initiate the server using:
+```sh
+docker run --rm -it --network heig-vd-dai --name my-server ghcr.io/lisagorgerat/practical-work-2 server -p=1234
+```
+![server](doc/img/docker_server.png)
 
-We initiate the server:
+> [!NOTE]
+> The picture was taken at the end of the following gameplay demonstration.
 
+For the first client, we initiate it using:
+```sh
+docker run --rm -it --network heig-vd-dai --name my-client-1 ghcr.io/lisagorgerat/practical-work-2 client -H=my-server -p=1234
+```
+The first client, then, create the game:
+![client 1 part 1](doc/img/docker_c1_p1.png)
+![client 1 part 2](doc/img/docker_c1_p2.png)
+![client 1 part 3](doc/img/docker_c1_p3.png)
 
-For the first client, we initiate it and create the game:
-
-
-For the second client, we initiate it and we join the game:
+For the second client, we initiate it using:
+```sh
+docker run --rm -it --network heig-vd-dai --name my-client-2 ghcr.io/lisagorgerat/practical-work-2 client -H=my-server -p=1234
+```
+The second client, then, create the game:
+![client 2 part 1](doc/img/docker_c2_p1.png)
+![client 2 part 2](doc/img/docker_c2_p2.png)
+![client 2 part 3](doc/img/docker_c2_p3.png)
