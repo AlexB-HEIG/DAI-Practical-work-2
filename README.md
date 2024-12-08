@@ -13,7 +13,6 @@
     - [Build the application](#build-the-application)
 - [Getting Started Using Docker](#getting-started-using-docker)
   - [Prerequisites](#prerequisites-1)
-  - [Recommendation](#recommendation-1)
   - [Setup](#setup-1)
     - [Get the package](#get-the-package)
     - [Build the application](#build-the-application-1)
