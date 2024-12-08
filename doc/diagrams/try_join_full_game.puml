@@ -1,0 +1,55 @@
+@startuml
+
+title "A Player try to join a game that is already full"
+
+participant "Client 1" as c1
+participant "Server" as s
+participant "Client 2" as c2
+participant "Client 3" as c3
+
+== Join the server ==
+
+note over c1, c3
+The socket is instanciated and the connection is
+automatically established.
+end note
+
+c1->s : Establish connection
+c1<-->s : Connection established
+
+c2->s : Establish connection
+c2<-->s : Connection established
+
+c3->s : Establish connection
+c3<-->s : Connection established
+
+== Create game ==
+
+c1->s: CREATE <size>
+s->c1: WAITING_OPPONENT <text>
+
+== List games available ==
+
+c2->s: LIST
+s->c2: GAME_LIST <text> <gameID1> <gameID2> ...
+
+c2->s: JOIN <id>
+
+s->c2: FIRSTOFCHAIN
+s->c2: GAME_INIT <text>
+s->c2: STANDARD_MESSAGE <text>
+s->c2: GAME_TABLE <text>
+s->c2: LASTOFCHAIN
+
+s->c1: FIRSTOFCHAIN
+s->c1: GAME_INIT <text>
+s->c1: STANDARD_MESSAGE <text>
+s->c1: GAME_TABLE <text>
+s->c1: LASTOFCHAIN
+
+== A Player try to join a game that is already full ==
+
+c3->s: JOIN Player3
+s->c3: ERROR 1
+
+@enduml

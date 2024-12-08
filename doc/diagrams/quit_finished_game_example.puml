@@ -1,0 +1,94 @@
+@startuml
+
+title "Functionnal example"
+
+participant "Client 1" as c1
+participant "Server" as s
+participant "Client 2" as c2
+
+== Join the server ==
+
+note over c1, c2
+The socket is instanciated and the connection is
+automatically established.
+end note
+
+c1->s : Establish connection
+c1<-->s : Connection established
+
+c2->s : Establish connection
+c2<-->s : Connection established
+
+
+== Create game ==
+
+c1->s: CREATE <size>
+s->c1: WAITING_OPPONENT <text>
+
+== List games available ==
+
+c2->s: LIST
+s->c2: GAME_LIST <text> <gameID1> <gameID2> ...
+
+c2->s: JOIN <id>
+
+s->c2: FIRSTOFCHAIN
+s->c2: GAME_INIT <text>
+s->c2: STANDARD_MESSAGE <text>
+s->c2: GAME_TABLE <text>
+s->c2: LASTOFCHAIN
+
+s->c1: FIRSTOFCHAIN
+s->c1: GAME_INIT <text>
+s->c1: STANDARD_MESSAGE <text>
+s->c1: GAME_TABLE <text>
+s->c1: LASTOFCHAIN
+
+== Game start ==
+
+loop
+
+
+    c1->s: PLACE <row> <column>
+    s->c1: GAME_TABLE
+    s->c2: GAME_TABLE
+
+    c2->s: PLACE <row> <column>
+    s->c2: GAME_TABLE
+    s->c1: GAME_TABLE
+
+    alt Game End (Player 1 Win)
+            s -> c1:FIRSTOFCHAIN
+            s -> c1:STANDARD_MESSAGE <text>
+            s -> c1:GAME_TABLE <text>
+            s -> c1:ENDGAME_MESSAGE <text> (WIN)
+            s -> c1:LASTOFCHAIN
+            s -> c2:FIRSTOFCHAIN
+            s -> c2:STANDARD_MESSAGE <text>
+            s -> c2:GAME_TABLE <text>
+            s -> c2:ENDGAME_MESSAGE <text> (LOSE)
+            s -> c2:LASTOFCHAIN
+        end
+
+        alt Game End (Draw)
+            s -> c1:FIRSTOFCHAIN
+            s -> c1:STANDARD_MESSAGE <text>
+            s -> c1:GAME_TABLE <text>
+            s -> c1:ENDGAME_MESSAGE <text> (DRAW)
+            s -> c1:LASTOFCHAIN
+            s -> c2:FIRSTOFCHAIN
+            s -> c2:STANDARD_MESSAGE <text>
+            s -> c2:GAME_TABLE <text>
+            s -> c2:ENDGAME_MESSAGE <text> (DRAW)
+            s -> c2:LASTOFCHAIN
+        end
+
+end
+
+    c1->s: PLACE <row> <column>
+    s->c1: ERROR -5
+
+
+
+
+@enduml
