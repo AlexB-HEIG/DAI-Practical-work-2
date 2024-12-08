@@ -87,8 +87,10 @@ loop
 
 end
 
-    c1->s: QUITGAME <text>
-    c2->s: QUITGAME <text>
+    c1->s: QUITGAME
+    s->c1: CONFIRMQUITGAME <text>
+    c2->s: QUITGAME
+    s->c2: CONFIRMQUITGAME <text>
 
 == Quit ==
 
@@ -96,11 +98,11 @@ note over c1, c2
 If the window is closed, the connection is automatically cut.
 end note
 
-c1->s: QUIT
+c1->c1: QUIT
 c1<-->s: The connection is closed
 
 
-c2->s: QUIT
+c2->c2: QUIT
 c2<-->s: The connection is closed
 
 
