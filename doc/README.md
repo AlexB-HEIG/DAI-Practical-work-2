@@ -7,7 +7,7 @@
 
 ## Section 1 - Overview
 
-The "Tic Tac Toe" protocol is a communication protocol that allows clients to play tic tac toe on a server together.
+The "Tic Tac Toe" protocol is a communication protocol that allows clients to play tic-tac-toe on a server together.
 
 ## Section 2 - Transport protocol
 
@@ -17,20 +17,15 @@ Every message must be encoded in UTF-8 and delimited by a newline character (`\n
 
 The initial connection must be established by the clients.
 
-Once the connection is estalibshed, the client is attributed an ID.
+Once the connection is established, the client is attributed an ID.
 
 Another client can connect to the same server and will be attributed another ID.
 
-> [!NOTE]
-> For simplicity 
+The client can send a message to the server indicating what to do.
 
+For example,  choose the size of the board(min 3 and max 9).
 
-the player 1 choose the size of the board(min 3 and max 9).
 The board is generated.
-
- Player 2.
-
-
 
 A loop will initiate, where:
 - A player will make a move 
@@ -38,157 +33,143 @@ A loop will initiate, where:
 - The other player will be notified of the move
 - The other player's board is updated
 
-A move is communicated using X, the column, and Y, the line, with the format `XY`.
+A move is communicated using X, the column, and Y, the line, with the format `X Y`.
 
 Another format will send back an error.
 
 An error can also be sent, if a player tries to put his symbol in a space that is already occupied.
 
-After a minimum number of moves depending on the size of the board, the appilcation will begin to check for a win.
-If the number of moves maximum is reached, the game will be determined to be a draw.
+After each move, the application will check for a win.
+
+If the maximum number of moves is reached, the game will be determined to be a draw.
 
 After a game has finished, the Player 1 can choose to begin another game, where they can put the same size of board or change it, or exit.
 
 > [!NOTE]  
 > 
-> The network connection can be closed on both sides (client and server). In the SMS protocol, the client closes the connection. In this example, we have decided that the client will advise the server to close the connection. The server will then close the connection on its side. This will close the connection on the client side as well.
-> Both solutions are possible.
-
+> The network connection can be closed on both sides (client and server).
 
 ## Section 3 - Messages
 
 ### Create game
-
 The client sends a create message to the server specifying the board size.
 
 #### Request
-
-````sh
+```sh
 CREATE <board size>
-````
-
-- ``board size``: the size of the board to create
+```
+- ``board size``: the size of the board to create.
 
 #### Response
-
-- ``WAIT_OPPONENT``: The board has been successfully created
-- ``INVALID``: There was an error
-  - 1: The board size wasn't specified
-  - 2: The size wasn't 3, 5, 7 or 9
+- ``WAIT_OPPONENT <text>``: The board has been successfully created.
+- ``INVALID <text>``: There was an error. The error is a string telling the problem.
+  - The board size wasn't specified
+  - The size wasn't 3, 5, 7 or 9
 
 ### List games
-
 The client sends a list message to the server to see the list of games available.
 
 #### Request
-
-````sh
+```sh
 LIST
-````
+```
 
 #### Response
-
-- ``GAME_LIST``: The server list the games available
+- ``GAME_LIST <text> <gameID1> <gameID2> ...``: The server list the games available. The games are separated by a `¦`.
 
 ### Join game
-
 The client sends a join message to the server specifying id of the game to join
 
 #### Request
-
-````sh
+```sh
 JOIN <id>
-````
-
+```
 - ``id``: id of the game to join
 
 #### Response
+- If request is correct
+  1. ``FIRSTOFCHAIN``: Announce the beginning of a communication chain.
+  2. ``INIT_GAME <text>``: Initialize the game.
+  3. ``STANDARD_MESSAGE <text>``: Send the message giving the symbol and first turn.
+  4. ``GAME_TABLE <text>``: Show the board. The board lines a separated by a `/`.
+  5. ``LASTOFCHAIN``: Announce the end of a communication chain.
+  
+- If request is wrong
+  - ``INVALID <text>``: There was an error
+    - The id doesn't correspond to an existing game.
+    - The id is missing.
 
-- ``FIRSTOFCHAIN``: Announce the beginning of game communication
-- ``INIT_GAME``: Initialize the game
-- ``STANDARD_MESSAGE``: Send the message giving the symbol and first turn
-- ``GAME_TABLE``: Show the board
-- ``LASTOFCHAIN``: Announce the end of game communication
-- ``INVALID``: There was an error
-    - 1: The id doesn't correspond to an existing game
+#### Response sent to the opponent
+- If request is correct
+  1. ``FIRSTOFCHAIN``: Announce the beginning of a communication chain.
+  2. ``INIT_GAME <text>``: Initialize the game.
+  3. ``STANDARD_MESSAGE <text>``: Send the message giving the symbol and first turn.
+  4. ``GAME_TABLE <text>``: Show the board. The board lines a separated by a `/`.
+  5. ``LASTOFCHAIN``: Announce the end of a communication chain.
 
-### Commands help
 
-The client sends a help message to the server to see tha commands and what they do.
-
-#### Request
-
-````sh
-HELP
-````
-
-#### Response
-
-- ``OK``: The commands are being listed
-
-### Quit server
-
-The client sends a quit message to the server stop the connection.
-
-#### Request
-
-````sh
-QUIT
-````
-
-#### Response
-
-- ``OK``: The client is disconnected from the server
-
-### Messages scpecific to the game
-
-NB: ``HELP`` can be used during games to list the commands of the the game.
-
-#### Place symbol
-
+### Place symbol
 The client sends a place message to the server specifying the placement in the grid
 
-##### Request
-
-````sh
+#### Request
+```sh
 PLACE <row> <column>
-````
+```
+- ``row``: row of the grid chosen, a letter.
+- ``column``: column of the grid chosen, a number.
 
-- ``row``: row of the grid chosen
-- ``column``: column of the grid chosen
+#### Response
+- If request is correct
+  - In case of victory, loss or draw:
+    1. ``FIRSTOFCHAIN``: Announce the beginning of a communication chain.
+    2. ``GAME_TABLE <text>``: Show the board. The board lines are separated by a `/`.
+    3. ``ENDGAME_MESSAGE <text>``: Send the message for the result. The message lines are separated by a `n`.
+    4. ``LASTOFCHAIN``: Announce the end of a communication chain.
+  - Otherwise
+    - ``GAME_TABLE <text>``: Show the board. The board lines a separated by a `/`.
 
-##### Response
+- If request is incorrect
+  - ``INVALID <text>``: There was an error
+    - It's not the client's turn to play
+    - Grid placement out of bounds
+    - Grid placement is already filled
+    - There is no opponent
+    - The game has already ended
+    - Wrong command format
 
-- ``GAME_TABLE``: Show the board
-- ``INVALID``: There was an error
-    - -1: It's not the client's turn to play
-    - -2: Grid placement out of bounds
-    - -3: Grid placement is already filled
-    - -4: There is no opponent
-    - -5: The game has already ended
-    - 1: Wrong command format
+#### Response sent to the opponent
+- If request is correct
+  - In case of victory, loss or draw:
+    1. ``FIRSTOFCHAIN``: Announce the beginning of a communication chain.
+    2. ``STANDARD_MESSAGE <text>``: Send the message telling were the opponent placed a piece.
+    3. ``GAME_TABLE <text>``: Show the board. The board lines are separated by a `/`.
+    4. ``ENDGAME_MESSAGE <text>``: Send the message for the result. The message lines are separated by a `n`.
+    5. ``LASTOFCHAIN``: Announce the end of a communication chain.
+  - Otherwise
+    1. ``FIRSTOFCHAIN``: Announce the beginning of a communication chain.
+    2. ``STANDARD_MESSAGE <text>``: Send the message telling were the opponent placed a piece.
+    3. ``GAME_TABLE <text>``: Show the board. The board lines are separated by a `/`.
+    4. ``LASTOFCHAIN``: Announce the end of a communication chain.
 
-In case of victory, loss or draw:
-- ``FIRSTOFCHAIN``: Announce the beginning of game communication
-- ``STANDARD_MESSAGE``: Send the message giving the symbol and first turn
-- ``GAME_TABLE``: Show the board
-- ``ENDGAME_MESSAGE``: Send the message for the result
-- ``LASTOFCHAIN``: Announce the end of game communication
-
-#### Quit game
-
+### Quit game
 The client sends a quit message to the server stop the game.
 
-##### Request
-
-````sh
+#### Request
+```sh
 QUITGAME
-````
+```
 
-##### Response
+#### Response
+- ``CONFIRMQUITGAME <text>``: Send the message that the client quit the game successfully
 
-- ``CONFIRMQUITGAME``: Send the message that the client quit the game successfully
-  - The client recieve a message that they have won the game by forfeit, if done before the end of the game
+#### Response sent to the opponent if present
+1. ``FIRSTOFCHAIN``: Announce the beginning of a communication chain.
+2. ``STANDARD_MESSAGE <text>``: Send the message telling the opponent has left.
+3. ``STANDARD_MESSAGE <text>``: Send the message telling the win by forfeit if opponent left before the end.
+4. ``LASTOFCHAIN``: Announce the end of a communication chain.
+
+
+
 
 ## Section 4 - Examples
 
